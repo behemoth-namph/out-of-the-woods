@@ -17,3 +17,11 @@ npm-debug.log*
 # env
 .env
 .env.local
+
+# scratch / temp working files
+scratch_*
+font-samples
+
+# python
+__pycache__
+*.pyc

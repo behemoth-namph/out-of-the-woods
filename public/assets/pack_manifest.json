@@ -1,0 +1,107 @@
+{
+  "game_id": "out-of-the-woods",
+  "source": "refs/ (reference art) via slot-dynamic-grid pipeline",
+  "generated_by": "scripts/*.py",
+  "count": {
+    "present": 19,
+    "missing": 0,
+    "total": 19
+  },
+  "assets": {
+    "tile_bunny": {
+      "file": "tiles/tile_bunny.webp",
+      "present": true,
+      "bytes": 86644
+    },
+    "tile_bluegirl": {
+      "file": "tiles/tile_bluegirl.webp",
+      "present": true,
+      "bytes": 67898
+    },
+    "tile_bear": {
+      "file": "tiles/tile_bear.webp",
+      "present": true,
+      "bytes": 83998
+    },
+    "tile_deer": {
+      "file": "tiles/tile_deer.webp",
+      "present": true,
+      "bytes": 68068
+    },
+    "tile_a": {
+      "file": "tiles/tile_a.webp",
+      "present": true,
+      "bytes": 46732
+    },
+    "tile_k": {
+      "file": "tiles/tile_k.webp",
+      "present": true,
+      "bytes": 57106
+    },
+    "tile_q": {
+      "file": "tiles/tile_q.webp",
+      "present": true,
+      "bytes": 35348
+    },
+    "tile_j": {
+      "file": "tiles/tile_j.webp",
+      "present": true,
+      "bytes": 45462
+    },
+    "tile_ten": {
+      "file": "tiles/tile_ten.webp",
+      "present": true,
+      "bytes": 48532
+    },
+    "tile_scatter": {
+      "file": "tiles/tile_scatter.webp",
+      "present": true,
+      "bytes": 57806
+    },
+    "tile_wild": {
+      "file": "tiles/tile_wild.webp",
+      "present": true,
+      "bytes": 54456
+    },
+    "tile_wild_gold": {
+      "file": "tiles/tile_wild_gold.webp",
+      "present": true,
+      "bytes": 50698
+    },
+    "bg_base": {
+      "file": "backgrounds/bg_base.webp",
+      "present": true,
+      "bytes": 344908
+    },
+    "bg_base_sp": {
+      "file": "backgrounds/bg_base_sp.webp",
+      "present": true,
+      "bytes": 372252
+    },
+    "bg_freespins": {
+      "file": "backgrounds/bg_freespins.webp",
+      "present": true,
+      "bytes": 605856
+    },
+    "win_big": {
+      "file": "backgrounds/win_big.webp",
+      "present": true,
+      "bytes": 231710
+    },
+    "win_mega": {
+      "file": "backgrounds/win_mega.webp",
+      "present": true,
+      "bytes": 196212
+    },
+    "win_super": {
+      "file": "backgrounds/win_super.webp",
+      "present": true,
+      "bytes": 247374
+    },
+    "win_sensational": {
+      "file": "backgrounds/win_sensational.webp",
+      "present": true,
+      "bytes": 254490
+    }
+  }
+}
