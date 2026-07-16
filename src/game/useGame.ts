@@ -12,9 +12,11 @@ const BASE_SEED = 0xc0ffee;
 const COST_FACTOR: Record<BetMode, number> = { normal: 1, ante: 5, "super-spin": 10 };
 
 // presentation durations (ms at normal speed)
+// drop/respinDrop cover the reel-blur phase + the staggered L→R landing in
+// BoardView.spinReel/landReel (last reel: lead + 0.3s drop + row cascade).
 const T = {
-  drop: 640,
-  respinDrop: 520,
+  drop: 1000,
+  respinDrop: 750,
   stackDetect: 320,
   winHold: 1000,
   shift: 460,

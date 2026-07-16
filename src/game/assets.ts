@@ -16,14 +16,20 @@ export const TILE_SRC: Record<SymbolId, string> = {
   J: `${B}assets/tiles/tile_j.webp`,
   "10": `${B}assets/tiles/tile_ten.webp`,
   scatter: `${B}assets/tiles/tile_scatter.webp`,
-  wild: `${B}assets/tiles/tile_wild.webp`,
+  // Reel wild = the cyan multiplier medallion (owl totem is chrome, not a tile).
+  wild: `${B}assets/tiles/tile_wild_multiplier.webp`,
 };
 
+// The carved-wood OWL totem. Per docs/art-design.md it is the game's mascot
+// (chrome / right-side "WILD MULTIPLIER" panel), NOT a reel tile — the reel wild
+// is the cyan medallion above. `_gold` is the brighter jump-glow variant.
 export const WILD_SRC = `${B}assets/tiles/tile_wild.webp`;
 export const WILD_GOLD_SRC = `${B}assets/tiles/tile_wild_gold.webp`;
-// The cyan scope-lens medallion, shown for wilds that carry a real multiplier
-// (mult >= 2). The game overlays the live "Nx" numeral on its empty centre.
+// The cyan scope-lens medallion — the reel WILD symbol (docs/art-design.md:101).
+// Shown on every wild cell; the game overlays the live "Nx" numeral on its empty
+// centre. `_gold` is the gold-ring variant for the bottom-row "jump" wild.
 export const WILD_MULTIPLIER_SRC = `${B}assets/tiles/tile_wild_multiplier.webp`;
+export const WILD_MULTIPLIER_GOLD_SRC = `${B}assets/tiles/tile_wild_multiplier_gold.webp`;
 
 export const LOGO_SRC = `${B}assets/chrome/logo.webp`;
 export const LOGO_FS_SRC = `${B}assets/chrome/logo_fs.webp`;

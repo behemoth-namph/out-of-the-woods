@@ -10,6 +10,7 @@ import {
   LOGO_SRC,
   TILE_SRC,
   WILD_GOLD_SRC,
+  WILD_MULTIPLIER_GOLD_SRC,
   WILD_MULTIPLIER_SRC,
   WILD_SRC,
 } from "../game/assets";
@@ -19,6 +20,7 @@ export interface GameTextures {
   wild: Texture | null;
   wildGold: Texture | null;
   wildMultiplier: Texture | null;
+  wildMultiplierGold: Texture | null;
   bg: Partial<Record<keyof typeof BG, Texture>>;
   gridFrame: Texture | null;
   logo: Texture | null;
@@ -40,17 +42,20 @@ export async function loadTextures(): Promise<GameTextures> {
   const bg: Partial<Record<keyof typeof BG, Texture>> = {};
   const bgEntries = Object.entries(BG) as [keyof typeof BG, string][];
 
-  const [tileResults, wild, wildGold, wildMultiplier, bgResults, gridFrame, logo, logoFs] =
-    await Promise.all([
-      Promise.all(tileEntries.map(([, url]) => tryLoad(url))),
-      tryLoad(WILD_SRC),
-      tryLoad(WILD_GOLD_SRC),
-      tryLoad(WILD_MULTIPLIER_SRC),
-      Promise.all(bgEntries.map(([, url]) => tryLoad(url))),
-      tryLoad(GRID_FRAME_SRC),
-      tryLoad(LOGO_SRC),
-      tryLoad(LOGO_FS_SRC),
-    ]);
+  const [
+    tileResults, wild, wildGold, wildMultiplier, wildMultiplierGold,
+    bgResults, gridFrame, logo, logoFs,
+  ] = await Promise.all([
+    Promise.all(tileEntries.map(([, url]) => tryLoad(url))),
+    tryLoad(WILD_SRC),
+    tryLoad(WILD_GOLD_SRC),
+    tryLoad(WILD_MULTIPLIER_SRC),
+    tryLoad(WILD_MULTIPLIER_GOLD_SRC),
+    Promise.all(bgEntries.map(([, url]) => tryLoad(url))),
+    tryLoad(GRID_FRAME_SRC),
+    tryLoad(LOGO_SRC),
+    tryLoad(LOGO_FS_SRC),
+  ]);
 
   tileEntries.forEach(([id], i) => {
     const t = tileResults[i];
@@ -61,5 +66,5 @@ export async function loadTextures(): Promise<GameTextures> {
     if (t) bg[id] = t;
   });
 
-  return { tiles, wild, wildGold, wildMultiplier, bg, gridFrame, logo, logoFs };
+  return { tiles, wild, wildGold, wildMultiplier, wildMultiplierGold, bg, gridFrame, logo, logoFs };
 }

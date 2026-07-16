@@ -157,6 +157,10 @@ def gen_multiplier(client) -> None:
     _, sheet, col, row, subject = MULTIPLIER
     print("[multiplier]  (cyan scope-lens; game overlays Nx) -> tile_wild_multiplier.webp")
     _emit(client, "wild_multiplier", sheet, col, row, subject, label="multiplier")
+    # gold-ring "jump" variant for the bottom-row wild (docs/art-design.md:101)
+    print("[multiplier_gold] -> tile_wild_multiplier_gold.webp")
+    gold_subject = subject.replace("riveted metal scope-ring", "riveted GOLD scope-ring")
+    _emit(client, "wild_multiplier_gold", sheet, col, row, gold_subject, label="multiplier_gold")
 
 
 ALL = list(CHARACTERS) + list(LETTERS) + ["scatter", "wild"]

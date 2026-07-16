@@ -94,8 +94,9 @@ export class PixiGame {
   private logo = new Container();
   private badgeGroup = new Container();
   private badgeVal!: Text;
+  private badgeBurst!: Graphics;
   private owlWord!: Text;
-  private owl!: Text;
+  private owl!: Container;
 
   private leftGroup = new Container();
   private buyPlate!: Container;
@@ -134,6 +135,8 @@ export class PixiGame {
   // reconciliation
   private prevSpinKey = -1;
   private prevBadge = -1;
+  private prevRoundWin = 0;
+  private winDisplay = { v: 0 };
   private prevModal: string | null | undefined = undefined;
   private prevFsIntro: number | null | undefined = undefined;
   private prevFsOutro: unknown = undefined;
@@ -245,9 +248,21 @@ export class PixiGame {
 
   // ── owl badge (multiplier) ─────────────────────────────────────────────────
   private buildBadge() {
-    // owl totem sits ABOVE the badge; sized/placed per orientation in layout()
-    const owl = new Text({ text: "🦉", style: new TextStyle({ fontFamily: FONT, fontSize: 300 }) });
-    owl.anchor.set(0.5);
+    // Owl totem (the game's mascot, docs/art-design.md:108/120) sits ABOVE the
+    // badge; sized/placed per orientation in layout(). Uses the generated owl art
+    // when present, else an emoji fallback.
+    const owl = new Container();
+    if (this.tex.wild) {
+      const s = new Sprite(this.tex.wild);
+      s.anchor.set(0.5);
+      const sc = 300 / Math.max(s.texture.width, s.texture.height);
+      s.scale.set(sc);
+      owl.addChild(s);
+    } else {
+      const emoji = new Text({ text: "🦉", style: new TextStyle({ fontFamily: FONT, fontSize: 300 }) });
+      emoji.anchor.set(0.5);
+      owl.addChild(emoji);
+    }
     this.owl = owl;
 
     // "WILD MULTIPLIER" runs VERTICALLY up the badge's left side (as in-game)
@@ -256,12 +271,14 @@ export class PixiGame {
     this.owlWord.rotation = -Math.PI / 2;
     this.owlWord.position.set(-150, -30);
 
+    // The badge disc shows the cyan multiplier medallion (the reel wild art) with
+    // the running top multiplier overlaid.
     const R = 118;
     const disc = new Graphics();
     disc.circle(0, 0, R).fill(vGrad(-R, -R, R * 2, R * 2, 0x7fd6f0, 0x2a6e8e));
     disc.circle(0, 0, R).stroke({ width: 10, color: 0x2a6e8e });
-    if (this.tex.wild) {
-      const s = new Sprite(this.tex.wild);
+    if (this.tex.wildMultiplier) {
+      const s = new Sprite(this.tex.wildMultiplier);
       s.anchor.set(0.5);
       const sc = Math.min((R * 1.9) / s.texture.width, (R * 1.9) / s.texture.height);
       s.scale.set(sc);
@@ -271,7 +288,34 @@ export class PixiGame {
     this.badgeVal.anchor.set(0.5);
     disc.addChild(this.badgeVal);
 
-    this.badgeGroup.addChild(owl, this.owlWord, disc);
+    // burst flash behind the disc — fires as the multiplier ladder climbs
+    // (docs/presentation-and-feel.md §Multiplier Effects, `multiplier_apply`)
+    this.badgeBurst = new Graphics();
+    const RAYS = 10;
+    for (let i = 0; i < RAYS; i++) {
+      const a = (i / RAYS) * Math.PI * 2;
+      const w = 0.16; // ray half-width (radians)
+      this.badgeBurst.poly([
+        Math.cos(a - w) * 96, Math.sin(a - w) * 96,
+        Math.cos(a) * 220, Math.sin(a) * 220,
+        Math.cos(a + w) * 96, Math.sin(a + w) * 96,
+      ]).fill({ color: COLORS.bloomFlame, alpha: 0.9 });
+    }
+    this.badgeBurst.blendMode = "add";
+    this.badgeBurst.alpha = 0;
+
+    this.badgeGroup.addChild(owl, this.owlWord, this.badgeBurst, disc);
+  }
+
+  /** Flash the burst rays behind the multiplier badge. */
+  private flashBadge() {
+    this.badgeBurst.rotation = gsap.utils.random(0, Math.PI / 5);
+    gsap.fromTo(this.badgeBurst, { alpha: 1 }, { alpha: 0, duration: 0.55, ease: "power2.out", overwrite: true });
+    gsap.fromTo(
+      this.badgeBurst.scale,
+      { x: 0.4, y: 0.4 },
+      { x: 1.25, y: 1.25, duration: 0.55, ease: "power2.out", overwrite: true }
+    );
   }
 
   // ── left panel (plates / free-spins counter) ───────────────────────────────
@@ -416,14 +460,23 @@ export class PixiGame {
   private makeSpinButton(): Container {
     const d = 144;
     const c = new Container();
+    // inner wrapper pivots on its centre so the press squash reads as a push-in
+    const inner = new Container();
     const g = new Graphics();
     g.circle(d / 2, d / 2, d / 2).fill(vGrad(0, 0, d, d, 0x3a2018, 0x1a0e0a)).stroke({ width: 6, color: COLORS.panelEdge });
     this.spinGlyph = new Text({ text: "⟳", style: new TextStyle({ fontFamily: FONT, fontSize: 60, fill: COLORS.white }) });
     centreText(this.spinGlyph, d / 2, d / 2);
-    c.addChild(g, this.spinGlyph);
+    inner.addChild(g, this.spinGlyph);
+    inner.pivot.set(d / 2, d / 2);
+    inner.position.set(d / 2, d / 2);
+    c.addChild(inner);
     c.eventMode = "static";
     c.cursor = "pointer";
     c.hitArea = new Rectangle(0, 0, d, d);
+    c.on("pointerdown", () => gsap.to(inner.scale, { x: 0.92, y: 0.92, duration: 0.08 }));
+    const release = () => gsap.to(inner.scale, { x: 1, y: 1, duration: 0.2, ease: "back.out(2.2)" });
+    c.on("pointerup", release);
+    c.on("pointerupoutside", release);
     c.on("pointertap", () => {
       const api = this.getApi();
       if (api.state.busy) api.actions.stop();
@@ -609,6 +662,8 @@ export class PixiGame {
     this.badgeVal.text = `${Math.max(1, s.badge)}x`;
     if (s.badge !== this.prevBadge) {
       gsap.fromTo(this.badgeVal.scale, { x: 1.6, y: 1.6 }, { x: 1, y: 1, duration: 0.45, ease: "back.out(2.4)" });
+      // burst flash as the ladder climbs (not on the reset back to 1×)
+      if (s.badge > Math.max(1, this.prevBadge)) this.flashBadge();
       this.prevBadge = s.badge;
     }
 
@@ -625,12 +680,35 @@ export class PixiGame {
       this.winLabel.visible = true;
       this.winVal.visible = true;
       this.winLabel.text = "WIN";
-      this.winVal.text = `$${fmt(s.roundWin)}`;
       this.winSub.text = winLbl;
+      // win_tally: the WIN amount rolls up instead of snapping
+      if (s.roundWin !== this.prevRoundWin) {
+        gsap.to(this.winDisplay, {
+          v: s.roundWin,
+          duration: 0.6,
+          ease: "power1.out",
+          overwrite: true,
+          onUpdate: () => (this.winVal.text = `$${fmt(this.winDisplay.v)}`),
+        });
+        gsap.fromTo(this.winVal.scale, { x: 1.18, y: 1.18 }, { x: 1, y: 1, duration: 0.3, ease: "back.out(2)", overwrite: true });
+      }
     } else {
       this.winLabel.visible = false;
       this.winVal.visible = false;
+      gsap.killTweensOf(this.winDisplay);
+      this.winDisplay.v = 0;
+      this.winVal.text = "";
       this.winSub.text = isFree ? winLbl : "SPIN TO WIN!";
+    }
+    this.prevRoundWin = s.roundWin;
+
+    // idle prompt gently pulses ("SPIN TO WIN!" / "PLACE YOUR BETS!")
+    const idle = !s.busy && s.roundWin === 0 && s.mode === "base";
+    if (idle && !gsap.isTweening(this.winSub)) {
+      gsap.to(this.winSub, { alpha: 0.45, duration: 0.9, repeat: -1, yoyo: true, ease: "sine.inOut" });
+    } else if (!idle && gsap.isTweening(this.winSub)) {
+      gsap.killTweensOf(this.winSub);
+      this.winSub.alpha = 1;
     }
 
     // buttons enabled state
@@ -1020,6 +1098,8 @@ export class PixiGame {
   destroy() {
     // kill only OUR tweens (not other PixiGame instances' — matters under React
     // StrictMode double-mount), then tear down the renderer.
+    this.board?.dispose(); // pending reel-stop delayedCalls aren't display objects
+    gsap.killTweensOf(this.winDisplay);
     killTweensDeep(this.root);
     this.clearTier();
     this.app?.destroy(true, { children: true });
